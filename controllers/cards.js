@@ -11,39 +11,35 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError({ message: 'Переданы некорректные данные' });
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        throw new InternalServerError({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
-    })
-    .catch(next);
+    });
 };
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() => {
-      throw new InternalServerError({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
 
 module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError({ message: 'По переданному id отсутствуют данные' });
+        throw new NotFoundError('По переданному id отсутствуют данные');
       } else {
         res.send({ data: card });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError({ message: 'Переданы некорректные данные' });
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        throw new InternalServerError({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.putLike = (req, res, next) => {
@@ -51,19 +47,15 @@ module.exports.putLike = (req, res, next) => {
   const { _id } = req.user;
 
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: _id } }, { new: true })
-    .orFail(() => { throw new Error('Что-то пошло не так...'); })
+    .orFail(() => { throw new NotFoundError('По переданному id отсутствуют данные'); })
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.message === 'Что-то пошло не так...') {
-        throw new NotFoundError({ message: 'По переданному id отсутствуют данные' });
-      }
       if (err.name === 'CastError') {
-        throw new BadRequestError({ message: 'Переданы некорректные данные' });
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        throw new InternalServerError({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.removeLike = (req, res, next) => {
@@ -71,17 +63,13 @@ module.exports.removeLike = (req, res, next) => {
   const { _id } = req.user;
 
   Card.findByIdAndUpdate(cardId, { $pull: { likes: _id } }, { new: true })
-    .orFail(() => { throw new Error('Что-то пошло не так...'); })
+    .orFail(() => { throw new NotFoundError('По переданному id отсутствуют данные'); })
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.message === 'Что-то пошло не так...') {
-        throw new NotFoundError({ message: 'По переданному id отсутствуют данные' });
-      }
       if (err.name === 'CastError') {
-        throw new BadRequestError({ message: 'Переданы некорректные данные' });
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        throw new InternalServerError({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
-    })
-    .catch(next);
+    });
 };
