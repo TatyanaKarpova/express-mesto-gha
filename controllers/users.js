@@ -9,7 +9,7 @@ module.exports.createUser = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
-        res.status(500).send({ message: 'Ошибка по-умолчанию' });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
@@ -17,22 +17,22 @@ module.exports.createUser = (req, res) => {
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(500).send({ message: 'Ошибка по-умолчанию' }));
+    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
-    .orFail(() => { throw new Error('NotFound'); })
+    .orFail(() => { throw new Error('Что-то пошло не так...'); })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.message === 'NotFound') {
+      if (err.message === 'Что-то пошло не так...') {
         res.status(404).send({ message: 'Передан некорректный id' });
         return;
       }
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
-        res.status(500).send({ message: 'Ошибка по-умолчанию' });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
@@ -46,7 +46,7 @@ module.exports.updateUser = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
-        res.status(500).send({ message: 'Ошибка по-умолчанию' });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
@@ -60,7 +60,7 @@ module.exports.updateAvatar = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
-        res.status(500).send({ message: 'Ошибка по-умолчанию' });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };

@@ -10,7 +10,7 @@ module.exports.createCard = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
-        res.status(500).send({ message: 'Ошибка по-умолчанию' });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
@@ -18,7 +18,7 @@ module.exports.createCard = (req, res) => {
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() => res.status(500).send({ message: 'Ошибка по-умолчанию' }));
+    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
 module.exports.deleteCard = (req, res) => {
@@ -34,7 +34,7 @@ module.exports.deleteCard = (req, res) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
-        res.status(500).send({ message: 'Ошибка по-умолчанию' });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
@@ -44,17 +44,17 @@ module.exports.putLike = (req, res) => {
   const { _id } = req.user;
 
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: _id } }, { new: true })
-    .orFail(() => { throw new Error('NotFound'); })
+    .orFail(() => { throw new Error('Что-то пошло не так...'); })
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.message === 'NotFound') {
+      if (err.message === 'Что-то пошло не так...') {
         res.status(404).send({ message: 'Передан некорректный id' });
         return;
       }
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
-        res.status(500).send({ message: 'Ошибка по-умолчанию' });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
@@ -64,17 +64,17 @@ module.exports.removeLike = (req, res) => {
   const { _id } = req.user;
 
   Card.findByIdAndUpdate(cardId, { $pull: { likes: _id } }, { new: true })
-    .orFail(() => { throw new Error('NotFound'); })
+    .orFail(() => { throw new Error('Что-то пошло не так...'); })
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.message === 'NotFound') {
+      if (err.message === 'Что-то пошло не так...') {
         res.status(404).send({ message: 'Передан некорректный id' });
         return;
       }
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
-        res.status(500).send({ message: 'Ошибка по-умолчанию' });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
