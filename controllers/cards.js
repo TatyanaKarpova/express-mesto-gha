@@ -44,8 +44,13 @@ module.exports.putLike = (req, res) => {
   const { _id } = req.user;
 
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: _id } }, { new: true })
+    .orFail(() => { throw new Error('NotFound'); })
     .then((card) => res.send(card))
     .catch((err) => {
+      if (err.message === 'NotFound') {
+        res.status(404).send({ message: 'Передан некорректный id' });
+        return;
+      }
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
@@ -59,8 +64,13 @@ module.exports.removeLike = (req, res) => {
   const { _id } = req.user;
 
   Card.findByIdAndUpdate(cardId, { $pull: { likes: _id } }, { new: true })
+    .orFail(() => { throw new Error('NotFound'); })
     .then((card) => res.send(card))
     .catch((err) => {
+      if (err.message === 'NotFound') {
+        res.status(404).send({ message: 'Передан некорректный id' });
+        return;
+      }
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
