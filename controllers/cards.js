@@ -6,19 +6,65 @@ module.exports.createCard = (req, res) => {
 
   Card.create({ name, link, owner })
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(500).send({ message: 'Ошибка по-умолчанию' });
+      }
+    });
 };
 
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() => res.send({ message: 'Произошла ошибка' }));
+    .catch(() => res.status(500).send({ message: 'Ошибка по-умолчанию' }));
 };
 
-module.exports.deleteCardById = (req, res) => {
-  const { userId } = req.params;
+module.exports.deleteCard = (req, res) => {
+  Card.findByIdAndRemove(req.params.cardId)
+    .then((card) => {
+      if (!card) {
+        res.status(404).send({ message: 'Передан некорректный id' });
+      } else {
+        res.send({ data: card });
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(500).send({ message: 'Ошибка по-умолчанию' });
+      }
+    });
+};
 
-  Card.findByIdAndRemove(userId)
-    .then((card) => res.status(200).send({ message: 'Карточка удалена' }))
-    .catch(() => res.status(400).send({ message: 'Произошла ошибка' }));
+module.exports.putLike = (req, res) => {
+  const { cardId } = req.params;
+  const { _id } = req.user;
+
+  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: _id } }, { new: true })
+    .then((card) => res.send(card))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(500).send({ message: 'Ошибка по-умолчанию' });
+      }
+    });
+};
+
+module.exports.removeLike = (req, res) => {
+  const { cardId } = req.params;
+  const { _id } = req.user;
+
+  Card.findByIdAndUpdate(cardId, { $pull: { likes: _id } }, { new: true })
+    .then((card) => res.send(card))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(500).send({ message: 'Ошибка по-умолчанию' });
+      }
+    });
 };
