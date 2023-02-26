@@ -10,19 +10,21 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+        throw new BadRequestError({ message: 'Переданы некорректные данные' });
       } else {
-        next(new InternalServerError({ message: 'На сервере произошла ошибка' }));
+        throw new InternalServerError({ message: 'На сервере произошла ошибка' });
       }
-    });
+    })
+    .catch(next);
 };
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
     .catch(() => {
-      next(new InternalServerError({ message: 'На сервере произошла ошибка' }));
-    });
+      throw new InternalServerError({ message: 'На сервере произошла ошибка' });
+    })
+    .catch(next);
 };
 
 module.exports.getUserById = (req, res, next) => {
@@ -31,15 +33,15 @@ module.exports.getUserById = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.message === 'Что-то пошло не так...') {
-        next(new NotFoundError({ message: 'По переданному id отсутствуют данные' }));
-        return;
+        throw new NotFoundError({ message: 'По переданному id отсутствуют данные' });
       }
       if (err.name === 'CastError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+        throw new BadRequestError({ message: 'Переданы некорректные данные' });
       } else {
-        next(new InternalServerError({ message: 'На сервере произошла ошибка' }));
+        throw new InternalServerError({ message: 'На сервере произошла ошибка' });
       }
-    });
+    })
+    .catch(next);
 };
 
 module.exports.updateUser = (req, res, next) => {
@@ -49,11 +51,12 @@ module.exports.updateUser = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+        throw new BadRequestError({ message: 'Переданы некорректные данные' });
       } else {
-        next(new InternalServerError({ message: 'На сервере произошла ошибка' }));
+        throw new InternalServerError({ message: 'На сервере произошла ошибка' });
       }
-    });
+    })
+    .catch(next);
 };
 
 module.exports.updateAvatar = (req, res, next) => {
@@ -63,9 +66,10 @@ module.exports.updateAvatar = (req, res, next) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+        throw new BadRequestError({ message: 'Переданы некорректные данные' });
       } else {
-        next(new InternalServerError({ message: 'На сервере произошла ошибка' }));
+        throw new InternalServerError({ message: 'На сервере произошла ошибка' });
       }
-    });
+    })
+    .catch(next);
 };

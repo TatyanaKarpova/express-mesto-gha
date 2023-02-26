@@ -11,18 +11,19 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+        throw new BadRequestError({ message: 'Переданы некорректные данные' });
       } else {
-        next(new InternalServerError({ message: 'На сервере произошла ошибка' }));
+        throw new InternalServerError({ message: 'На сервере произошла ошибка' });
       }
-    });
+    })
+    .catch(next);
 };
 
-module.exports.getCards = (req, res, next) => {
+module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
     .catch(() => {
-      next(new InternalServerError({ message: 'На сервере произошла ошибка' }));
+      throw new InternalServerError({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -30,18 +31,19 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        next(new NotFoundError({ message: 'По переданному id отсутствуют данные' }));
+        throw new NotFoundError({ message: 'По переданному id отсутствуют данные' });
       } else {
         res.send({ data: card });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+        throw new BadRequestError({ message: 'Переданы некорректные данные' });
       } else {
-        next(new InternalServerError({ message: 'На сервере произошла ошибка' }));
+        throw new InternalServerError({ message: 'На сервере произошла ошибка' });
       }
-    });
+    })
+    .catch(next);
 };
 
 module.exports.putLike = (req, res, next) => {
@@ -53,15 +55,15 @@ module.exports.putLike = (req, res, next) => {
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.message === 'Что-то пошло не так...') {
-        next(new NotFoundError({ message: 'По переданному id отсутствуют данные' }));
-        return;
+        throw new NotFoundError({ message: 'По переданному id отсутствуют данные' });
       }
       if (err.name === 'CastError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+        throw new BadRequestError({ message: 'Переданы некорректные данные' });
       } else {
-        next(new InternalServerError({ message: 'На сервере произошла ошибка' }));
+        throw new InternalServerError({ message: 'На сервере произошла ошибка' });
       }
-    });
+    })
+    .catch(next);
 };
 
 module.exports.removeLike = (req, res, next) => {
@@ -73,13 +75,13 @@ module.exports.removeLike = (req, res, next) => {
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.message === 'Что-то пошло не так...') {
-        next(new NotFoundError({ message: 'По переданному id отсутствуют данные' }));
-        return;
+        throw new NotFoundError({ message: 'По переданному id отсутствуют данные' });
       }
       if (err.name === 'CastError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+        throw new BadRequestError({ message: 'Переданы некорректные данные' });
       } else {
-        next(new InternalServerError({ message: 'На сервере произошла ошибка' }));
+        throw new InternalServerError({ message: 'На сервере произошла ошибка' });
       }
-    });
+    })
+    .catch(next);
 };
