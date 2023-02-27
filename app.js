@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { notFoundErrorCode } = require('./utils/constants');
 
 const { PORT = 3000 } = process.env;
 
@@ -23,7 +24,7 @@ app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
 app.use('*', (req, res) => {
-  res.status(404).send({ message: 'Страница не найдена' });
+  res.status(notFoundErrorCode).send({ message: 'По переданному id отсутствуют данные' });
 });
 
 app.listen(PORT, () => {
