@@ -1,17 +1,43 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { badRequestErrorCode, internalServerErrorCode, notFoundErrorCode } = require('../utils/constants');
+const {
+  badRequestErrorCode,
+  internalServerErrorCode,
+  notFoundErrorCode,
+  unauthorizedErrorCode,
+  successCode,
+  conflictErrorCode,
+} = require('../utils/constants');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(badRequestErrorCode).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
-      }
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      User.create({
+        name, about, avatar, email, password: hash,
+      })
+        .then((user) => {
+          const newUser = user.toObject();
+          delete newUser.password;
+          res.send({ data: newUser });
+        })
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            res.status(badRequestErrorCode).send({ message: 'Переданы некорректные данные' });
+            return;
+          }
+          if (err.code === 11000) {
+            res.status(conflictErrorCode).send({ message: 'Пользователем с такими e-mail уже существует' });
+          } else {
+            res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
+          }
+        });
     });
 };
 
@@ -20,6 +46,19 @@ module.exports.getUsers = (req, res) => {
     .then((users) => res.send(users))
     .catch(() => {
       res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
+    });
+};
+
+module.exports.getUser = (req, res) => {
+  User.findById(req.user._id)
+    .orFail(() => { throw new Error('NotFound'); })
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      if (err.message === 'NotFound') {
+        res.status(notFoundErrorCode).send({ message: 'Пользователь не найден' });
+      } else {
+        res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
+      }
     });
 };
 
@@ -58,6 +97,28 @@ module.exports.updateAvatar = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(badRequestErrorCode).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
+      }
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials({ email, password })
+    .orFail(() => { throw new Error('NotFound'); })
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
+      res.cookie('jwt', token, {
+        httpOnly: true,
+        maxAge: 3600000 * 24 * 7,
+      });
+      res.status(successCode).send({ message: 'Авторизация прошла успешно' });
+    })
+    .catch((err) => {
+      if (err.message === 'AuthError') {
+        res.status(unauthorizedErrorCode).send({ message: 'При авторизации переданы некорректные почта или пароль' });
       } else {
         res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
       }

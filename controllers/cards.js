@@ -1,5 +1,10 @@
 const Card = require('../models/card');
-const { badRequestErrorCode, internalServerErrorCode, notFoundErrorCode } = require('../utils/constants');
+const {
+  badRequestErrorCode,
+  internalServerErrorCode,
+  notFoundErrorCode,
+  forbiddenErrorCode,
+} = require('../utils/constants');
 
 module.exports.createCard = (req, res) => {
   const owner = req.user._id;
@@ -25,12 +30,15 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
         res.status(notFoundErrorCode).send({ message: 'По переданному id отсутствуют данные' });
+      } else if (req.user._id !== card.owner._id.toString()) {
+        res.status(forbiddenErrorCode).send({ message: 'У вас нет прав на удаление данной карточки' });
       } else {
-        res.send({ data: card });
+        card.remove()
+          .then(() => res.send({ data: card }));
       }
     })
     .catch((err) => {
