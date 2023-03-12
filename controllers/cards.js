@@ -53,6 +53,7 @@ module.exports.putLike = (req, res, next) => {
   const { _id } = req.user;
 
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: _id } }, { new: true })
+    .orFail(() => { throw new NotFoundError('По переданному id отсутствуют данные'); })
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -68,6 +69,7 @@ module.exports.removeLike = (req, res, next) => {
   const { _id } = req.user;
 
   Card.findByIdAndUpdate(cardId, { $pull: { likes: _id } }, { new: true })
+    .orFail(() => { throw new NotFoundError('По переданному id отсутствуют данные'); })
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
