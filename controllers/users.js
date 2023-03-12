@@ -1,18 +1,15 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const {
-  badRequestErrorCode,
-  internalServerErrorCode,
-  notFoundErrorCode,
-  unauthorizedErrorCode,
-  successCode,
-  conflictErrorCode,
-} = require('../utils/constants');
+const { successCode } = require('../utils/constants');
+const BadRequestError = require('../errors/BadRequestError');
+const ConflictError = require('../errors/ConflictError');
+const InternalServerError = require('../errors/InternalServerError');
+const NotFoundError = require('../errors/NotFoundError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -22,105 +19,100 @@ module.exports.createUser = (req, res) => {
       User.create({
         name, about, avatar, email, password: hash,
       })
-        .then((user) => {
-          const newUser = user.toObject();
-          delete newUser.password;
-          res.send({ data: newUser });
-        })
+        .then(() => res.status(successCode).send({
+          data: {
+            name, about, avatar, email,
+          },
+        }))
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            res.status(badRequestErrorCode).send({ message: 'Переданы некорректные данные' });
-            return;
+            next(new BadRequestError('Переданы некорректные данные'));
+          } else if (err.code === 11000) {
+            next(new ConflictError('Пользователем с такими e-mail уже существует'));
           }
-          if (err.code === 11000) {
-            res.status(conflictErrorCode).send({ message: 'Пользователем с такими e-mail уже существует' });
-          } else {
-            res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
-          }
+          next(new InternalServerError('На сервере произошла ошибка'));
         });
     });
 };
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
     .catch(() => {
-      res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
+      next(new InternalServerError('На сервере произошла ошибка'));
     });
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(() => { throw new Error('NotFound'); })
+    .orFail(() => { throw new NotFoundError('По переданному id отсутствуют данные'); })
     .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.message === 'NotFound') {
-        res.status(notFoundErrorCode).send({ message: 'Пользователь не найден' });
-      } else {
-        res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
-      }
+    .catch(() => {
+      next(new InternalServerError('На сервере произошла ошибка'));
     });
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
-    .orFail(() => { res.status(notFoundErrorCode).send({ message: 'По переданному id отсутствуют данные' }); })
+    .orFail(() => { throw new NotFoundError('По переданному id отсутствуют данные'); })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(badRequestErrorCode).send({ message: 'Переданы некорректные данные' });
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
     });
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+    .orFail(() => { throw new NotFoundError('По переданному id отсутствуют данные'); })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(badRequestErrorCode).send({ message: 'Переданы некорректные данные' });
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
     });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
+    .orFail(() => { throw new NotFoundError('По переданному id отсутствуют данные'); })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(badRequestErrorCode).send({ message: 'Переданы некорректные данные' });
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
-  User.findUserByCredentials({ email, password })
-    .orFail(() => { throw new Error('NotFound'); })
+  User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
-      res.cookie('jwt', token, {
-        httpOnly: true,
-        maxAge: 3600000 * 24 * 7,
-      });
-      res.status(successCode).send({ message: 'Авторизация прошла успешно' });
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        { expiresIn: '7d' },
+      );
+      res
+        .cookie('jwt', token, {
+          httpOnly: true,
+          maxAge: 3600000 * 24 * 7,
+        })
+        .send({ jwt: token });
     })
-    .catch((err) => {
-      if (err.message === 'AuthError') {
-        res.status(unauthorizedErrorCode).send({ message: 'При авторизации переданы некорректные почта или пароль' });
-      } else {
-        res.status(internalServerErrorCode).send({ message: 'На сервере произошла ошибка' });
-      }
+    .catch(() => {
+      next(new InternalServerError('На сервере произошла ошибка'));
     });
 };
