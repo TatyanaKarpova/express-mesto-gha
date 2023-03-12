@@ -78,8 +78,9 @@ module.exports.updateUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные'));
-        console.log(err);
-      } else next(err);
+      } else {
+        next(new InternalServerError('На сервере произошла ошибка'));
+      }
     });
 };
 
