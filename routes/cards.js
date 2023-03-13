@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, CelebrateError, Joi } = require('celebrate');
 const { validateUrl } = require('../utils/urlValidator');
 
 const {
@@ -12,6 +12,7 @@ const {
 
 const BadRequestError = require('../errors/BadRequestError');
 const InternalServerError = require('../errors/InternalServerError');
+const { messages } = require('../utils/messages');
 
 router.post(
   '/cards',
@@ -22,11 +23,11 @@ router.post(
     }),
   }),
   createCard,
-).use((err, req, res, next) => {
+).use((err) => {
   if (err.name === 'ValidationError') {
-    next(new BadRequestError('Переданы некорректные данные'));
+    throw new CelebrateError(messages.badRequest);
   } else {
-    next(new InternalServerError('На сервере произошла ошибка'));
+    throw new CelebrateError(messages.internal);
   }
 });
 
