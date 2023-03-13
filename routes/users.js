@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi, isCelebrateError } = require('celebrate');
 const { validateUrl } = require('../utils/urlValidator');
 
 const {
@@ -25,7 +25,7 @@ router.get(
   }),
   getUserById,
 ).use((err, req, res, next) => {
-  if (err.name === 'CastError') {
+  if (isCelebrateError(err)) {
     next(new BadRequestError('Переданы некорректные данные'));
   } else {
     next(new InternalServerError('На сервере произошла ошибка'));
@@ -42,7 +42,7 @@ router.patch(
   }),
   updateUser,
 ).use((err, req, res, next) => {
-  if (err.name === 'ValidationError') {
+  if (isCelebrateError(err)) {
     next(new BadRequestError('Переданы некорректные данные'));
   } else {
     next(new InternalServerError('На сервере произошла ошибка'));
@@ -58,7 +58,7 @@ router.patch(
   }),
   updateAvatar,
 ).use((err, req, res, next) => {
-  if (err.name === 'ValidationError') {
+  if (isCelebrateError(err)) {
     next(new BadRequestError('Переданы некорректные данные'));
   } else {
     next(new InternalServerError('На сервере произошла ошибка'));

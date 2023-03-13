@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { celebrate, CelebrateError, Joi } = require('celebrate');
+const { celebrate, Joi, isCelebrateError } = require('celebrate');
 const { validateUrl } = require('../utils/urlValidator');
 
 const {
@@ -12,7 +12,6 @@ const {
 
 const BadRequestError = require('../errors/BadRequestError');
 const InternalServerError = require('../errors/InternalServerError');
-const { messages } = require('../utils/messages');
 
 router.post(
   '/cards',
@@ -23,11 +22,11 @@ router.post(
     }),
   }),
   createCard,
-).use((err) => {
-  if (err.name === 'ValidationError') {
-    throw new CelebrateError(messages.badRequest);
+).use((err, req, res, next) => {
+  if (isCelebrateError(err)) {
+    next(new BadRequestError('Переданы некорректные данные'));
   } else {
-    throw new CelebrateError(messages.internal);
+    next(new InternalServerError('На сервере произошла ошибка'));
   }
 });
 
@@ -42,7 +41,7 @@ router.delete(
   }),
   deleteCard,
 ).use((err, req, res, next) => {
-  if (err.name === 'CastError') {
+  if (isCelebrateError(err)) {
     next(new BadRequestError('Переданы некорректные данные'));
   } else {
     next(new InternalServerError('На сервере произошла ошибка'));
@@ -58,7 +57,7 @@ router.put(
   }),
   putLike,
 ).use((err, req, res, next) => {
-  if (err.name === 'CastError') {
+  if (isCelebrateError(err)) {
     next(new BadRequestError('Переданы некорректные данные'));
   } else {
     next(new InternalServerError('На сервере произошла ошибка'));
@@ -74,7 +73,7 @@ router.delete(
   }),
   removeLike,
 ).use((err, req, res, next) => {
-  if (err.name === 'CastError') {
+  if (isCelebrateError(err)) {
     next(new BadRequestError('Переданы некорректные данные'));
   } else {
     next(new InternalServerError('На сервере произошла ошибка'));
