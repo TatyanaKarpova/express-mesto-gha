@@ -42,7 +42,6 @@ app.post(
 );
 
 app.use(auth);
-app.use(errors());
 
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
@@ -60,6 +59,8 @@ app.use((err, req, res, next) => {
   });
   next();
 });
+
+app.use(errors());
 
 mongoose.connect('mongodb://localhost:27017/mestodb').then(() => {
   app.listen(PORT, () => {
