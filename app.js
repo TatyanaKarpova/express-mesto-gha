@@ -16,8 +16,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-mongoose.connect('mongodb://localhost:27017/mestodb');
-
 app.post(
   '/signin',
   celebrate({
@@ -63,6 +61,8 @@ app.use((err, req, res, next) => {
   next();
 });
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
+mongoose.connect('mongodb://localhost:27017/mestodb').then(() => {
+  app.listen(PORT, () => {
+    console.log(`App listening on port ${PORT}`);
+  });
 });
