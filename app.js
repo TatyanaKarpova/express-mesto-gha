@@ -12,7 +12,6 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { validateUrl } = require('./utils/urlValidator');
 const BadRequestError = require('./errors/BadRequestError');
-const { messages } = require('./utils/messages');
 
 const { PORT = 3000 } = process.env;
 
@@ -61,7 +60,7 @@ app.use((err, req, res, next) => {
   let details;
 
   if (isCelebrateError(err)) {
-    details = new BadRequestError(messages.badRequest);
+    details = new BadRequestError('Переданы некорректные данные');
   } else {
     details = err;
   }
@@ -69,7 +68,7 @@ app.use((err, req, res, next) => {
   const { statusCode = 500, message = '' } = details;
   res.status(statusCode).send({
     message: statusCode === 500
-      ? `На сервере произошла ошибка (app.js): ${err.message}`
+      ? 'На сервере произошла ошибка'
       : message,
   });
   next();
