@@ -2,11 +2,17 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const { celebrate, Joi, errors } = require('celebrate');
+const {
+  celebrate,
+  Joi, errors,
+  isCelebrateError,
+} = require('celebrate');
 const NotFoundError = require('./errors/NotFoundError');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { validateUrl } = require('./utils/urlValidator');
+const BadRequestError = require('./errors/BadRequestError');
+const { messages } = require('./utils/messages');
 
 const { PORT = 3000 } = process.env;
 
@@ -52,7 +58,15 @@ app.use('*', (req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
+  let details;
+
+  if (isCelebrateError(err)) {
+    details = new BadRequestError(messages.badRequest);
+  } else {
+    details = err;
+  }
+
+  const { statusCode = 500, message = '' } = details;
   res.status(statusCode).send({
     message: statusCode === 500
       ? `На сервере произошла ошибка (app.js): ${err.message}`

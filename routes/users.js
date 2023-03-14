@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { celebrate, Joi, isCelebrateError } = require('celebrate');
+const { celebrate, Joi } = require('celebrate');
 const { validateUrl } = require('../utils/urlValidator');
 
 const {
@@ -9,9 +9,6 @@ const {
   updateUser,
   updateAvatar,
 } = require('../controllers/users');
-
-const BadRequestError = require('../errors/BadRequestError');
-const InternalServerError = require('../errors/InternalServerError');
 
 router.get('/users', getUsers);
 router.get('/users/me', getUser);
@@ -24,13 +21,7 @@ router.get(
     }),
   }),
   getUserById,
-).use((err, req, res, next) => {
-  if (isCelebrateError(err)) {
-    next(new BadRequestError('Переданы некорректные данные'));
-  } else {
-    next(new InternalServerError('На сервере произошла ошибка'));
-  }
-});
+);
 
 router.patch(
   '/users/me',
@@ -41,13 +32,7 @@ router.patch(
     }),
   }),
   updateUser,
-).use((err, req, res, next) => {
-  if (isCelebrateError(err)) {
-    next(new BadRequestError('Переданы некорректные данные'));
-  } else {
-    next(new InternalServerError('На сервере произошла ошибка'));
-  }
-});
+);
 
 router.patch(
   '/users/me/avatar',
@@ -57,12 +42,6 @@ router.patch(
     }),
   }),
   updateAvatar,
-).use((err, req, res, next) => {
-  if (isCelebrateError(err)) {
-    next(new BadRequestError('Переданы некорректные данные'));
-  } else {
-    next(new InternalServerError('На сервере произошла ошибка'));
-  }
-});
+);
 
 module.exports = router;
