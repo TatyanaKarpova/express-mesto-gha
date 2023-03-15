@@ -4,7 +4,8 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const {
   celebrate,
-  Joi, errors,
+  Joi,
+  errors,
   isCelebrateError,
 } = require('celebrate');
 const NotFoundError = require('./errors/NotFoundError');
@@ -25,8 +26,10 @@ app.post(
   '/signin',
   celebrate({
     body: Joi.object().keys({
-      email: Joi.string().required().email(),
-      password: Joi.string().required(),
+      email: Joi.string().required().email()
+        .rule({ message: 'Некорректно заполнено поле email при авторизации' }),
+      password: Joi.string().required()
+        .rule({ message: 'Некорректно заполнено поле password при авторизации' }),
     }),
   }),
   login,
@@ -36,11 +39,16 @@ app.post(
   '/signup',
   celebrate({
     body: Joi.object().keys({
-      email: Joi.string().required().email(),
-      password: Joi.string().required(),
-      name: Joi.string().min(2).max(30),
-      about: Joi.string().min(2).max(30),
-      avatar: Joi.string().custom(validateUrl),
+      email: Joi.string().required().email()
+        .rule({ message: 'Некорректно заполнено поле email при регистрации' }),
+      password: Joi.string().required()
+        .rule({ message: 'Некорректно заполнено поле password при регистрации' }),
+      name: Joi.string().min(2).max(30)
+        .rule({ message: 'Некорректно заполнено поле name при регистрации' }),
+      about: Joi.string().min(2).max(30)
+        .rule({ message: 'Некорректно заполнено поле about при регистрации' }),
+      avatar: Joi.string().custom(validateUrl)
+        .rule({ message: 'Некорректно заполнено поле avatar при регистрации' }),
     }),
   }),
   createUser,
