@@ -18,7 +18,7 @@ router.get(
   celebrate({
     params: Joi.object().keys({
       userId: Joi.string().required().length(24).hex()
-        .message('Не удалось выполнить функцию getUserById'),
+        .rule({ message: 'Не удалось выполнить функцию getUserByI' }),
     }),
   }),
   getUserById,
@@ -29,9 +29,9 @@ router.patch(
   celebrate({
     body: Joi.object().keys({
       name: Joi.string().required().min(2).max(30)
-        .message('Не удалось обновить имя пользователя'),
+        .rule({ message: 'Не удалось обновить имя пользователя' }),
       about: Joi.string().required().min(2).max(30)
-        .message('Не удалось обновить описание пользователя'),
+        .rule({ message: 'Не удалось обновить описание пользователя' }),
     }),
   }),
   updateUser,
@@ -42,7 +42,7 @@ router.patch(
   celebrate({
     body: Joi.object().keys({
       avatar: Joi.string().custom(validateUrl)
-        .message('Не удалось обновить аватар пользователя'),
+        .rule({ message: 'Не удалось обновить аватар пользователя' }),
     }),
   }),
   updateAvatar,
