@@ -26,10 +26,8 @@ app.post(
   '/signin',
   celebrate({
     body: Joi.object().keys({
-      email: Joi.string().required().email()
-        .rule({ message: 'Некорректно заполнено поле email при авторизации' }),
-      password: Joi.string().required()
-        .rule({ message: 'Некорректно заполнено поле password при авторизации' }),
+      email: Joi.string().required().email(),
+      password: Joi.string().required(),
     }),
   }),
   login,
@@ -39,16 +37,11 @@ app.post(
   '/signup',
   celebrate({
     body: Joi.object().keys({
-      email: Joi.string().required().email()
-        .rule({ message: 'Некорректно заполнено поле email при регистрации' }),
-      password: Joi.string().required()
-        .rule({ message: 'Некорректно заполнено поле password при регистрации' }),
-      name: Joi.string().min(2).max(30)
-        .rule({ message: 'Некорректно заполнено поле name при регистрации' }),
-      about: Joi.string().min(2).max(30)
-        .rule({ message: 'Некорректно заполнено поле about при регистрации' }),
-      avatar: Joi.string().custom(validateUrl)
-        .rule({ message: 'Некорректно заполнено поле avatar при регистрации' }),
+      email: Joi.string().required().email(),
+      password: Joi.string().required(),
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+      avatar: Joi.string().custom(validateUrl),
     }),
   }),
   createUser,
