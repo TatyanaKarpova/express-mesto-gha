@@ -8,9 +8,7 @@ const {
   errors,
   isCelebrateError,
 } = require('celebrate');
-/*
 const auth = require('./middlewares/auth');
-*/
 const NotFoundError = require('./errors/NotFoundError');
 const { login, createUser } = require('./controllers/users');
 const { validateUrl } = require('./utils/urlValidator');
@@ -49,9 +47,7 @@ app.post(
   createUser,
 );
 
-/*
 app.use(auth);
-*/
 
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
