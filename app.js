@@ -8,9 +8,9 @@ const {
   errors,
   isCelebrateError,
 } = require('celebrate');
+const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/NotFoundError');
 const { login, createUser } = require('./controllers/users');
-const auth = require('./middlewares/auth');
 const { validateUrl } = require('./utils/urlValidator');
 const BadRequestError = require('./errors/BadRequestError');
 
@@ -62,9 +62,7 @@ app.use((err, req, res, next) => {
 
   if (isCelebrateError(err)) {
     details = new BadRequestError('Переданы некорректные данные');
-  } else if (err.details) {
-    details = err.details.get('body');
-    console.log(details);
+    err.details.get('body');
   } else {
     details = err;
   }
