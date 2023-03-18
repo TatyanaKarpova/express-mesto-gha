@@ -62,6 +62,9 @@ app.use((err, req, res, next) => {
 
   if (isCelebrateError(err)) {
     details = new BadRequestError('Переданы некорректные данные');
+  } else if (err.details) {
+    details = err.details.get('body');
+    console.log(details);
   } else {
     details = err;
   }
