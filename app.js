@@ -8,7 +8,9 @@ const {
   errors,
   isCelebrateError,
 } = require('celebrate');
+/*
 const auth = require('./middlewares/auth');
+*/
 const NotFoundError = require('./errors/NotFoundError');
 const { login, createUser } = require('./controllers/users');
 const { validateUrl } = require('./utils/urlValidator');
@@ -47,8 +49,9 @@ app.post(
   createUser,
 );
 
+/*
 app.use(auth);
-app.use(errors());
+*/
 
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
@@ -57,12 +60,13 @@ app.use('*', (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 
+app.use(errors());
+
 app.use((err, req, res, next) => {
   let details;
 
   if (isCelebrateError(err)) {
-    details = new BadRequestError('Переданы некорректные данные');
-    err.details.get('body');
+    details = new BadRequestError(err.details.get('body'));
   } else {
     details = err;
   }

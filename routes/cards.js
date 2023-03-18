@@ -15,10 +15,8 @@ router.post(
   '/cards',
   celebrate({
     body: Joi.object().keys({
-      name: Joi.string().required().min(2).max(30)
-        .rule({ message: 'Некорректно заполнено поле card.name' }),
-      link: Joi.string().required().min(2).custom(validateUrl)
-        .rule({ message: 'Некорректно заполнено поле card.link' }),
+      name: Joi.string().required().min(2).max(30),
+      link: Joi.string().required().min(2).custom(validateUrl),
     }),
   }),
   createCard,
@@ -30,8 +28,7 @@ router.delete(
   '/cards/:cardId',
   celebrate({
     params: Joi.object().keys({
-      cardId: Joi.string().required().length(24).hex()
-        .rule({ message: 'Не удалось удалить карточку' }),
+      cardId: Joi.string().required().length(24).hex(),
     }),
   }),
   deleteCard,
@@ -41,8 +38,7 @@ router.put(
   '/cards/:cardId/likes',
   celebrate({
     params: Joi.object().keys({
-      cardId: Joi.string().required().length(24).hex()
-        .rule({ message: 'Не удалось поставить лайк' }),
+      cardId: Joi.string().required().length(24).hex(),
     }),
   }),
   putLike,
@@ -52,8 +48,7 @@ router.delete(
   '/cards/:cardId/likes',
   celebrate({
     params: Joi.object().keys({
-      cardId: Joi.string().required().length(24).hex()
-        .rule({ message: 'Не удалось снять лайк' }),
+      cardId: Joi.string().required().length(24).hex(),
     }),
   }),
   removeLike,
