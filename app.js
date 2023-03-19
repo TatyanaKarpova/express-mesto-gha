@@ -64,8 +64,10 @@ app.use((err, req, res, next) => {
 
   if (isCelebrateError(err)) {
     details = new BadRequestError(err.details.get('body'));
-  } else {
+  } else if (err.code === 401) {
     details = new UnauthorizedError('Необходима авторизация');
+  } else {
+    details = err;
   }
   const { statusCode = 500, message = '' } = details;
   res.status(statusCode).send({
