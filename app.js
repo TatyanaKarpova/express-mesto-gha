@@ -66,10 +66,13 @@ app.use((err, req, res, next) => {
     details = new BadRequestError(err.details.get('body'));
   } else if (err.statusCode === 401) {
     details = new UnauthorizedError('Необходима авторизация');
+    console.log(details);
+  } else {
+    details = err;
+    console.log(err.message);
+    console.log(err.statusCode);
   }
-  next(err);
-  console.log(err.message);
-  console.log(err.statusCode);
+
   const { statusCode = 500, message = '' } = details;
   res.status(statusCode).send({
     message: statusCode === 500
