@@ -65,15 +65,13 @@ app.use((err, req, res, next) => {
   if (isCelebrateError(err)) {
     details = new BadRequestError(err.details.get('body'));
   } else if (err.statusCode === 401) {
-    details = new UnauthorizedError('Необходима авторизация');
-    console.log(details);
+    details = err.message;
+    console.log(err.statusCode, err.message);
   } else {
     details = err;
-    console.log(err.message);
-    console.log(err.statusCode);
   }
 
-  const { statusCode = 500, message = '' } = details;
+  const { statusCode = 500, message = '' } = err;
   res.status(statusCode).send({
     message: statusCode === 500
       ? 'На сервере произошла ошибка'
