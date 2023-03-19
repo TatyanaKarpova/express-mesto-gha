@@ -13,6 +13,7 @@ const NotFoundError = require('./errors/NotFoundError');
 const { login, createUser } = require('./controllers/users');
 const { validateUrl } = require('./utils/urlValidator');
 const BadRequestError = require('./errors/BadRequestError');
+const UnauthorizedError = require('./errors/UnauthorizedError');
 
 const { PORT = 3000 } = process.env;
 
@@ -65,6 +66,7 @@ app.use((err, req, res, next) => {
     details = new BadRequestError(err.details.get('body'));
   } else {
     details = err;
+    next(new UnauthorizedError('Необходима авторизация'));
   }
 
   const { statusCode = 500, message = '' } = details;
