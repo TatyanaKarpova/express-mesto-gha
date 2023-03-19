@@ -64,8 +64,8 @@ app.use((err, req, res, next) => {
   if (isCelebrateError(err)) {
     details = new BadRequestError(err.details.get('body'));
   } else {
-    details = err;
-    console.log(err);
+    details = err.statusCode;
+    console.log(err.statusCode);
   }
   const { statusCode = 500, message = '' } = details;
   res.status(statusCode).send({
