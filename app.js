@@ -65,8 +65,8 @@ app.use((err, req, res, next) => {
   if (isCelebrateError(err)) {
     details = new BadRequestError(err.details.get('body'));
   } else {
-    details = err;
-    next(new UnauthorizedError('Необходима авторизация'));
+    details = new UnauthorizedError('Необходима авторизация');
+    console.log(UnauthorizedError);
   }
 
   const { statusCode = 500, message = '' } = details;
