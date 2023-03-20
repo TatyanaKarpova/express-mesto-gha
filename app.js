@@ -10,7 +10,6 @@ const {
 } = require('celebrate');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/NotFoundError');
-const UnauthorizedError = require('./errors/UnauthorizedError');
 const { login, createUser } = require('./controllers/users');
 const { validateUrl } = require('./utils/urlValidator');
 const BadRequestError = require('./errors/BadRequestError');
@@ -64,18 +63,13 @@ app.use((err, req, res, next) => {
 
   if (isCelebrateError(err)) {
     details = new BadRequestError(err.details.get('body'));
-  } else if (err.statusCode === 401) {
-    details = err.message;
-    console.log(err.statusCode, err.message);
   } else {
     details = err;
   }
 
-  const { statusCode = 500, message = '' } = err;
+  const { statusCode = 500, message = 'На сервере произошла ошибка' } = details;
   res.status(statusCode).send({
-    message: statusCode === 500
-      ? 'На сервере произошла ошибка'
-      : message,
+    message,
   });
   next();
 });
