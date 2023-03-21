@@ -98,7 +98,7 @@ module.exports.login = (req, res, next) => {
         })
         .send({ jwt: token });
     })
-    .catch(() => {
-      next(new InternalServerError('На сервере произошла ошибка'));
+    .catch((err) => {
+      next(err);
     });
 };
