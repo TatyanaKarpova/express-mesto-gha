@@ -26,7 +26,7 @@ module.exports.deleteCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('По переданному id отсутствуют данные');
       } else if (req.user._id !== card.owner._id.toString()) {
-        next(new ForbiddenError('Вы не можете удалить чужую карточку'));
+        next(new ForbiddenError('Недостаточно прав на удаление карточки'));
       } else {
         card.remove()
           .then(() => res.send({ data: card }));
